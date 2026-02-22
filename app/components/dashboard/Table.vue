@@ -13,10 +13,54 @@ interface Project {
   expTotal: number;
   amount: number;
   createdAt: string;
+  status: "ABIERTO" | "CERRADO" | "TECO";
+}
+
+// MODAL
+const isStatusModalOpen = ref(false);
+const selectedProject = ref<Project | null>(null);
+const newStatus = ref<"ABIERTO" | "CERRADO" | "TECO">("ABIERTO");
+const toast = useToast();
+
+function openStatusModal(project: Project) {
+  selectedProject.value = project;
+  newStatus.value = project.status;
+  isStatusModalOpen.value = true;
+}
+
+async function updateProjectStatus() {
+  if (!selectedProject.value) return;
+
+  try {
+    await $fetch(`/api/projects/${selectedProject.value.id}/status`, {
+      method: "PATCH",
+      body: { status: newStatus.value },
+    });
+
+    toast.add({
+      title: "Estado actualizado",
+      description: `Proyecto cambiado a ${newStatus.value}`,
+      color: "success",
+    });
+
+    isStatusModalOpen.value = false;
+
+    await refreshNuxtData();
+  } catch (err) {
+    toast.add({
+      title: "Error",
+      description: "No se pudo actualizar el estado",
+      color: "error",
+    });
+  }
 }
 
 const props = defineProps<{
   projects: Project[];
+}>();
+
+const emit = defineEmits<{
+  (e: "change-status", project: Project): void;
 }>();
 
 const columns: TableColumn<Project>[] = [
@@ -104,7 +148,10 @@ function getRowItems(row: Row<Project>) {
       type: "separator",
     },
     {
-      label: "View customer",
+      label: "Cambiar Estado",
+      onSelect() {
+        emit("change-status", row.original);
+      },
     },
     {
       label: "View payment details",
@@ -115,6 +162,9 @@ function getRowItems(row: Row<Project>) {
 const table = useTemplateRef("table");
 
 const columnFilters = ref([]);
+watch(isStatusModalOpen, (val) => {
+  console.log("Modal:", val);
+});
 </script>
 
 <template>

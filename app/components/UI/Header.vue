@@ -5,23 +5,13 @@ const route = useRoute();
 
 const items = computed<NavigationMenuItem[]>(() => [
   {
-    label: "Docs",
-    to: "/docs/getting-started",
-    active: route.path.startsWith("/docs/getting-started"),
+    label: "Proyectos",
+    to: "/projects",
+    active: route.path.startsWith("/projects"),
   },
   {
-    label: "Components",
-    to: "/docs/components",
-    active: route.path.startsWith("/docs/components"),
-  },
-  {
-    label: "Figma",
-    to: "https://go.nuxt.com/figma-ui",
-    target: "_blank",
-  },
-  {
-    label: "Releases",
-    to: "https://github.com/nuxt/ui/releases",
+    label: "Accesos Diarios",
+    to: "http://localhost:3000/",
     target: "_blank",
   },
 ]);
