@@ -71,54 +71,6 @@ const { data: projects } = await useFetch("/api/projects", {
 const { data: stats } = await useFetch("/api/projects/projectsStats", {
   method: "GET",
 });
-
-type Project = {
-  id: string;
-  lcpCode: string;
-  name: string;
-  status: "ABIERTO" | "CERRADO" | "TECO";
-};
-
-// MODAL STATE
-const isStatusModalOpen = ref(false);
-const selectedProject = ref<Project | null>(null);
-const newStatus = ref<"ABIERTO" | "CERRADO" | "TECO">("ABIERTO");
-
-const toast = useToast();
-
-function openStatusModal(project: Project) {
-  selectedProject.value = project;
-  newStatus.value = project.status;
-  isStatusModalOpen.value = true;
-}
-
-async function updateProjectStatus() {
-  if (!selectedProject.value) return;
-
-  try {
-    await $fetch(`/api/projects/${selectedProject.value.id}/status`, {
-      method: "PATCH",
-      body: { status: newStatus.value },
-    });
-
-    toast.add({
-      title: "Estado actualizado",
-      description: `Proyecto cambiado a ${newStatus.value}`,
-      color: "success",
-    });
-
-    isStatusModalOpen.value = false;
-
-    await refreshProjects();
-    await refreshStats();
-  } catch (err) {
-    toast.add({
-      title: "Error",
-      description: "No se pudo actualizar el estado",
-      color: "error",
-    });
-  }
-}
 </script>
 
 <style scoped></style>

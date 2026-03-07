@@ -18,14 +18,21 @@ interface Project {
 
 // MODAL
 const isStatusModalOpen = ref(false);
+const isUserModalOpen = ref(false);
 const selectedProject = ref<Project | null>(null);
 const newStatus = ref<"ABIERTO" | "CERRADO" | "TECO">("ABIERTO");
+const newUser = ref<string>("");
 const toast = useToast();
 
 function openStatusModal(project: Project) {
   selectedProject.value = project;
   newStatus.value = project.status;
   isStatusModalOpen.value = true;
+}
+
+function openUserModal(project: Project) {
+  selectedProject.value = project;
+  isUserModalOpen.value = true;
 }
 
 async function updateProjectStatus() {
@@ -50,6 +57,33 @@ async function updateProjectStatus() {
     toast.add({
       title: "Error",
       description: "No se pudo actualizar el estado",
+      color: "error",
+    });
+  }
+}
+
+async function updateProjectUser() {
+  if (!selectedProject.value) return;
+
+  try {
+    await $fetch(`/api/projects/${selectedProject.value.id}/engineer`, {
+      method: "PATCH",
+      body: { projectEngineer: newUser.value },
+    });
+
+    toast.add({
+      title: "Usuario actualizado",
+      description: `Proyecto asignado a ${newUser.value}`,
+      color: "success",
+    });
+
+    isUserModalOpen.value = false;
+
+    await refreshNuxtData();
+  } catch (err) {
+    toast.add({
+      title: "Error",
+      description: "No se pudo actualizar el usuario",
       color: "error",
     });
   }
@@ -154,7 +188,10 @@ function getRowItems(row: Row<Project>) {
       },
     },
     {
-      label: "View payment details",
+      label: "Asignar Usuario",
+      onSelect() {
+        openUserModal(row.original);
+      },
     },
   ];
 }
@@ -229,6 +266,32 @@ watch(isStatusModalOpen, (val) => {
               @click="isStatusModalOpen = false"
             />
             <UButton label="Guardar" @click="updateProjectStatus" />
+          </div>
+        </div>
+      </template>
+    </UModal>
+    <UModal v-model:open="isUserModalOpen">
+      <template #content>
+        <div class="p-6 space-y-4">
+          <h3 class="text-lg font-semibold">Asignar Usuario</h3>
+
+          <p>
+            Proyecto:
+            <strong>{{ selectedProject?.name }}</strong>
+          </p>
+
+          <USelect
+            v-model="newUser"
+            :items="[{ label: 'Jhonnathan Garban', value: 'ZA51560' }]"
+          />
+
+          <div class="flex justify-end gap-2 pt-4">
+            <UButton
+              label="Cancelar"
+              variant="ghost"
+              @click="isUserModalOpen = false"
+            />
+            <UButton label="Guardar" @click="updateProjectUser" />
           </div>
         </div>
       </template>
