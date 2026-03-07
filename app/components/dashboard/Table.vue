@@ -150,7 +150,7 @@ function getRowItems(row: Row<Project>) {
     {
       label: "Cambiar Estado",
       onSelect() {
-        emit("change-status", row.original);
+        openStatusModal(row.original);
       },
     },
     {
@@ -203,5 +203,35 @@ watch(isStatusModalOpen, (val) => {
         />
       </div>
     </template>
+    <UModal v-model:open="isStatusModalOpen">
+      <template #content>
+        <div class="p-6 space-y-4">
+          <h3 class="text-lg font-semibold">Cambiar estado</h3>
+
+          <p>
+            Proyecto:
+            <strong>{{ selectedProject?.name }}</strong>
+          </p>
+
+          <USelect
+            v-model="newStatus"
+            :items="[
+              { label: 'Abierto', value: 'ABIERTO' },
+              { label: 'Cerrado', value: 'CERRADO' },
+              { label: 'TECO', value: 'TECO' },
+            ]"
+          />
+
+          <div class="flex justify-end gap-2 pt-4">
+            <UButton
+              label="Cancelar"
+              variant="ghost"
+              @click="isStatusModalOpen = false"
+            />
+            <UButton label="Guardar" @click="updateProjectStatus" />
+          </div>
+        </div>
+      </template>
+    </UModal>
   </UCard>
 </template>
